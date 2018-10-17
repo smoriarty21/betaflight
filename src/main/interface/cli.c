@@ -2264,6 +2264,24 @@ static void cliName(char *cmdline)
     printName(DUMP_MASTER, pilotConfig());
 }
 
+static void printDisplayName(uint8_t dumpMask, const pilotConfig_t *pilotConfig)
+{
+    const bool equalsDefault = strlen(pilotConfig->displayName) == 0;
+    cliDumpPrintLinef(dumpMask, equalsDefault, "display name %s", equalsDefault ? emptyName : pilotConfig->displayName);
+}
+
+static void cliDisplayName(char *cmdline)
+{
+    const unsigned int len = strlen(cmdline);
+    if (len > 0) {
+        memset(pilotConfigMutable()->displayName, 0, ARRAYLEN(pilotConfig()->displayName));
+        if (strncmp(cmdline, emptyName, len)) {
+            strncpy(pilotConfigMutable()->displayName, cmdline, MIN(len, MAX_NAME_LENGTH));
+        }
+    }
+    printDisplayName(DUMP_MASTER, pilotConfig());
+}
+
 #if defined(USE_BOARD_INFO)
 
 #define ERROR_MESSAGE "%s CANNOT BE CHANGED. CURRENT VALUE: '%s'"
@@ -4504,6 +4522,7 @@ const clicmd_t cmdTable[] = {
     CLI_COMMAND_DEF("msc", "switch into msc mode", NULL, cliMsc),
 #endif
     CLI_COMMAND_DEF("name", "name of craft", NULL, cliName),
+    CLI_COMMAND_DEF("display_name", "display name of craft", NULL, cliDisplayName),
 #ifndef MINIMAL_CLI
     CLI_COMMAND_DEF("play_sound", NULL, "[<index>]", cliPlaySound),
 #endif
